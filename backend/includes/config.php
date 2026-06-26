@@ -13,7 +13,7 @@ ini_set('display_errors', 1);
 // IONOS: numele bazei de date este de regulă și username-ul.
 // Dacă hostul nu este "localhost", schimbă DB_HOST cu hostul din panoul IONOS
 // (ex: db5017xxxxx.hosting-data.io).
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_HOST', getenv('DB_HOST') ?: 'mysql8');
 define('DB_NAME', getenv('DB_NAME') ?: '01144012_avs');
 define('DB_USER', getenv('DB_USER') ?: '01144012_avs');
 define('DB_PASS', getenv('DB_PASS') ?: 'AVSolutions2026Parola');
