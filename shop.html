@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produse - Casigaz</title>
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --blue-dark: #1e3a8a;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 10px -2px rgba(0,0,0,0.03);
+            --radius: 1.25rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--white);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ========== HEADER ========== */
+        .navbar {
+            padding: 0.8rem 0;
+            background: var(--white);
+            box-shadow: var(--shadow);
+            z-index: 1040;
+        }
+        @media (min-width: 992px) {
+            .navbar {
+                background: transparent;
+                box-shadow: none;
+                padding: 1rem 0;
+                transition: var(--transition);
+            }
+            .navbar.scrolled {
+                background: rgba(255,255,255,0.85);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+                border-radius: 50px;
+                margin: 0.8rem auto;
+                max-width: 700px;
+                padding: 0.5rem 2rem;
+            }
+        }
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        @media (min-width: 992px) {
+            .navbar-brand img { height: 65px; }
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text) !important;
+            margin: 0 0.3rem;
+            transition: var(--transition);
+            border-radius: 50px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: var(--green-light);
+            color: var(--green) !important;
+        }
+        .header-icons .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--gray-100);
+            color: var(--text);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .header-icons .btn:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--green);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25em 0.5em;
+            border-radius: 20px;
+        }
+
+        /* ========== PAGE HEADER ========== */
+        .page-header {
+            padding: 6rem 0 2rem;
+            background: linear-gradient(135deg, #e0f2fe 0%, #d1fae5 100%);
+            margin-bottom: 2rem;
+        }
+        @media (min-width: 768px) {
+            .page-header { padding: 7rem 0 2rem; }
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        @media (min-width: 768px) {
+            .section-title { font-size: 2.2rem; }
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--blue));
+            border-radius: 4px;
+            margin: 0.4rem auto 0;
+        }
+
+        /* ========== SEARCH BAR ========== */
+        .search-bar {
+            max-width: 400px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+        .search-bar input {
+            border-radius: 50px;
+            padding-left: 2.5rem;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        .search-bar .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* ========== PRODUCT CARDS ========== */
+        .product-card {
+            border: none;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: white;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            height: 100%;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+        .product-img-wrap {
+            position: relative;
+            overflow: hidden;
+            height: 200px;
+            background: #f8fafc;
+        }
+        @media (min-width: 768px) {
+            .product-img-wrap { height: 230px; }
+        }
+        .product-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 2;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .favorite-btn.active { color: #ef4444; }
+        .product-category {
+            font-size: 0.75rem;
+            background: var(--green-light);
+            color: var(--green);
+            padding: 0.2em 0.8em;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        .product-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .product-price {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--blue-dark);
+        }
+        .btn-cart {
+            background: linear-gradient(135deg, var(--green), #059669);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .btn-cart:hover {
+            background: linear-gradient(135deg, #059669, var(--green));
+            transform: translateY(-1px);
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+        }
+        .footer h5 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .footer a:hover { color: var(--green); }
+        .footer-logo img {
+            height: 50px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="index.html">Acasă</a></li>
+                <li class="nav-item"><a class="nav-link" href="proiect.html">Proiect</a></li>
+                <li class="nav-item"><a class="nav-link active" href="shop.html">Produse</a></li>
+                <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            </ul>
+            <div class="header-icons d-flex gap-2 mt-2 mt-lg-0">
+                <a class="btn" href="favorite.html" title="Favorite">
+                    <i class="bi bi-heart"></i>
+                    <span class="badge-count" id="favCount">0</span>
+                </a>
+                <a class="btn" href="cos.html" title="Coș">
+                    <i class="bi bi-cart3"></i>
+                    <span class="badge-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== PAGE HEADER ==================== -->
+<section class="page-header">
+    <div class="container text-center">
+        <h1 class="section-title">Produsele noastre</h1>
+        <p class="text-muted">Alege din gama variată de centrale, boilere și accesorii</p>
+    </div>
+</section>
+
+<!-- ==================== PRODUCTS ==================== -->
+<section id="products" class="py-4">
+    <div class="container">
+        <!-- Căutare -->
+        <div class="search-bar">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="form-control" id="searchInput" placeholder="Caută produsul dorit...">
+        </div>
+
+        <!-- Categorii dinamice -->
+        <div class="d-flex flex-wrap justify-content-center gap-2 mb-4" id="categoryFilters">
+            <button class="btn btn-outline-success rounded-pill active" data-category="">Toate</button>
+        </div>
+
+        <!-- Grid produse -->
+        <div class="row g-4" id="productsGrid"></div>
+
+        <!-- Paginare -->
+        <div class="d-flex justify-content-center mt-5" id="paginationContainer"></div>
+    </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="footer-logo mb-3">
+                    <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+                </div>
+                <p>Specialiști în centrale termice și instalații de gaz. Confort garantat.</p>
+                <div class="d-flex gap-2 mt-3">
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5>Navigare</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index.html">Acasă</a></li>
+                    <li><a href="proiect.html">Proiect</a></li>
+                    <li><a href="shop.html">Produse</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Program</h5>
+                <ul class="list-unstyled">
+                    <li>Luni – Vineri: 08–16</li>
+                    <li>Sâmbătă: Închis</li>
+                    <li>Duminică: Închis</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-geo-alt me-2"></i>Bd. Epureanu 34, Bârlad</li>
+                    <li><i class="bi bi-telephone me-2"></i>+40 721 123 456</li>
+                    <li><i class="bi bi-envelope me-2"></i>casigazserv@yahoo.com</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4">
+        <div class="text-center">
+            <small>&copy; 2026 Casigaz. Toate drepturile rezervate.</small>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS + custom scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ==================== CONFIG ====================
+const API_BASE = '/backend/api/';
+const PRODUCTS_URL = API_BASE + 'products.php';
+const CART_URL = API_BASE + 'cart.php';
+let currentPage = 1, currentCategory = '', currentSearch = '';
+
+// ==================== HEADER SCROLL (doar desktop) ====================
+const navbar = document.getElementById('mainNav');
+if (window.innerWidth >= 992) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+}
+
+// ==================== SEARCH ====================
+const searchInput = document.getElementById('searchInput');
+let searchTimeout;
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        currentSearch = searchInput.value.trim();
+        currentPage = 1;
+        loadProducts();
+    }, 400);
+});
+
+// ==================== FAVORITES (localStorage) ====================
+function getFavorites() {
+    return JSON.parse(localStorage.getItem('casigaz_favorites') || '[]');
+}
+function saveFavorites(favs) {
+    localStorage.setItem('casigaz_favorites', JSON.stringify(favs));
+}
+function toggleFavorite(product) {
+    const favs = getFavorites();
+    const idx = favs.findIndex(f => f.id == product.id);
+    if (idx > -1) favs.splice(idx, 1);
+    else favs.push(product);
+    saveFavorites(favs);
+    updateFavCount();
+    renderProducts(window.currentProducts || []);
+}
+function isFavorite(id) {
+    return getFavorites().some(f => f.id == id);
+}
+function updateFavCount() {
+    document.getElementById('favCount').textContent = getFavorites().length;
+}
+
+// ==================== CART (API) ====================
+async function updateCartDisplay() {
+    try {
+        const res = await fetch(CART_URL);
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('cartCount').textContent = data.items.length;
+        }
+    } catch(e) { console.error('Eroare cart:', e); }
+}
+async function addToCart(productId) {
+    await fetch(CART_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ product_id: productId, quantity: 1 })
+    });
+    updateCartDisplay();
+}
+
+// ==================== PRODUCTS FETCH ====================
+async function fetchCategoriesAndProducts() {
+    try {
+        const res = await fetch(PRODUCTS_URL);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+            // populate categories
+            const cats = new Set(json.data.map(p => p.category).filter(Boolean));
+            const container = document.getElementById('categoryFilters');
+            container.querySelectorAll('button:not(:first-child)').forEach(b => b.remove());
+            cats.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-success rounded-pill';
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = cat;
+                    currentPage = 1;
+                    currentSearch = '';
+                    searchInput.value = '';
+                    loadProducts();
+                });
+                container.appendChild(btn);
+            });
+            // reattach "Toate" event
+            const allBtn = container.querySelector('button[data-category=""]');
+            allBtn.addEventListener('click', () => {
+                container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                allBtn.classList.add('active');
+                currentCategory = '';
+                currentPage = 1;
+                currentSearch = '';
+                searchInput.value = '';
+                loadProducts();
+            });
+            loadProducts();
+        } else {
+            console.error('Răspuns invalid de la API:', json);
+        }
+    } catch(e) { console.error('Eroare fetch:', e); }
+}
+async function loadProducts() {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-success"></div></div>';
+    const params = new URLSearchParams({ page: currentPage, limit: 12 });
+    if (currentCategory) params.append('category', currentCategory);
+    if (currentSearch) params.append('search', currentSearch);
+    const res = await fetch(PRODUCTS_URL + '?' + params);
+    const json = await res.json();
+    if (json.success) {
+        window.currentProducts = json.data;
+        renderProducts(json.data);
+        renderPagination(json.pages, json.page);
+    } else {
+        grid.innerHTML = '<div class="col-12 text-center text-muted">Nu s-au găsit produse.</div>';
+    }
+}
+function renderProducts(products) {
+    const grid = document.getElementById('productsGrid');
+    if (!products.length) {
+        grid.innerHTML = '<div class="col-12 text-center text-muted">Niciun produs disponibil.</div>';
+        return;
+    }
+    grid.innerHTML = products.map(p => `
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card">
+                <a href="${p.url}" class="text-decoration-none">
+                    <div class="product-img-wrap">
+                        <img src="${p.image ? p.image : 'https://via.placeholder.com/300x240?text=Casigaz'}" alt="${p.name}" loading="lazy">
+                    </div>
+                </a>
+                <button class="favorite-btn ${isFavorite(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite({id:${p.id}, name:'${p.name.replace(/'/g, "\\'")}', price:${p.price}, image:'${p.image || ''}'})">
+                    <i class="bi ${isFavorite(p.id) ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                </button>
+                <div class="p-3">
+                    <span class="product-category">${p.category || 'General'}</span>
+                    <a href="${p.url}" class="text-decoration-none text-dark">
+                        <h6 class="product-title">${p.name}</h6>
+                    </a>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="product-price">${p.price_on_request ? 'Preț la cerere' : parseFloat(p.price).toFixed(2) + ' RON'}</span>
+                    </div>
+                    ${p.price_on_request ? 
+                        '<button class="btn btn-warning btn-sm w-100 mt-2">Cere ofertă</button>' :
+                        `<button class="btn btn-cart btn-sm w-100 mt-2" onclick="event.stopPropagation(); addToCart(${p.id})">Adaugă</button>`
+                    }
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+function renderPagination(totalPages, current) {
+    const container = document.getElementById('paginationContainer');
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+    container.innerHTML = [...Array(totalPages).keys()].map(i => `
+        <button class="btn btn-sm mx-1 ${i+1 === current ? 'btn-success' : 'btn-outline-success'} page-btn" data-page="${i+1}">${i+1}</button>
+    `).join('');
+    document.querySelectorAll('.page-btn').forEach(b => b.addEventListener('click', function(){
+        currentPage = parseInt(this.dataset.page);
+        loadProducts();
+        window.scrollTo({top: document.getElementById('products').offsetTop - 100, behavior: 'smooth'});
+    }));
+}
+
+// ==================== START ====================
+document.addEventListener('DOMContentLoaded', () => {
+    updateFavCount();
+    updateCartDisplay();
+    fetchCategoriesAndProducts();
+});
+</script>
+</body>
+</html>

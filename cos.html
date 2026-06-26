@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coșul meu – Casigaz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --blue-dark: #1e3a8a;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --radius: 1.25rem;
+            --transition: all 0.3s ease;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--white);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Header – identic cu restul paginilor */
+        .navbar {
+            padding: 0.8rem 0;
+            background: var(--white);
+            box-shadow: var(--shadow);
+            z-index: 1040;
+        }
+        @media (min-width: 992px) {
+            .navbar {
+                background: transparent;
+                box-shadow: none;
+                padding: 1rem 0;
+            }
+            .navbar.scrolled {
+                background: rgba(255,255,255,0.85);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+                border-radius: 50px;
+                margin: 0.8rem auto;
+                max-width: 700px;
+                padding: 0.5rem 2rem;
+            }
+        }
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        @media (min-width: 992px) {
+            .navbar-brand img { height: 65px; }
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text) !important;
+            margin: 0 0.3rem;
+            transition: var(--transition);
+            border-radius: 50px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: var(--green-light);
+            color: var(--green) !important;
+        }
+        .header-icons .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--gray-100);
+            color: var(--text);
+            text-decoration: none;
+        }
+        .header-icons .btn:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--green);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25em 0.5em;
+            border-radius: 20px;
+        }
+
+        /* Conținut */
+        .cart-container {
+            flex: 1;
+            padding: 6rem 0 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--blue));
+            border-radius: 4px;
+            margin-top: 0.4rem;
+        }
+        .cart-item {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .cart-item img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+        }
+        .item-details { flex: 1; min-width: 200px; }
+        .item-name { font-weight: 600; }
+        .item-price { font-weight: 700; color: var(--blue-dark); }
+        .item-quantity input {
+            width: 60px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            padding: 0.3rem;
+        }
+        .item-subtotal { font-weight: 700; min-width: 80px; }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        .total-box {
+            background: var(--green-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .total-price { font-size: 1.8rem; font-weight: 800; color: var(--blue-dark); }
+        .btn-checkout {
+            background: linear-gradient(135deg, var(--green), #059669);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-checkout:hover { transform: translateY(-2px); background: linear-gradient(135deg, #059669, var(--green)); }
+
+        /* Checkout form */
+        .checkout-form {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-top: 2rem;
+        }
+        .checkout-form h4 { font-weight: 700; margin-bottom: 1rem; }
+        .checkout-form .form-label { font-weight: 500; font-size: 0.9rem; }
+        .checkout-form .form-control { border-radius: 0.75rem; border: 1px solid var(--gray-200); }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 3rem 0 1.5rem;
+            margin-top: auto;
+        }
+        .footer h5 { color: white; font-weight: 600; }
+        .footer a { color: #94a3b8; text-decoration: none; }
+        .footer a:hover { color: var(--green); }
+        .footer-logo img { height: 50px; }
+
+        @media (max-width: 576px) {
+            .cart-item { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="index.html">Acasă</a></li>
+                <li class="nav-item"><a class="nav-link" href="proiect.html">Proiect</a></li>
+                <li class="nav-item"><a class="nav-link" href="shop.html">Produse</a></li>
+                <li class="nav-item"><a class="nav-link active" href="cos.html">Coș</a></li>
+            </ul>
+            <div class="header-icons d-flex gap-2 mt-2 mt-lg-0">
+                <a class="btn" href="favorite.html" title="Favorite">
+                    <i class="bi bi-heart"></i>
+                    <span class="badge-count" id="favCount">0</span>
+                </a>
+                <a class="btn" href="cos.html" title="Coș">
+                    <i class="bi bi-cart3"></i>
+                    <span class="badge-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== CONTINUT COȘ ==================== -->
+<div class="cart-container container">
+    <h2 class="section-title">Coșul tău de cumpărături</h2>
+    <div id="cartItems"><p class="text-center text-muted">Se încarcă...</p></div>
+    <div id="cartTotalBox" class="total-box d-none">
+        <span class="fw-bold">Total comandă:</span>
+        <span class="total-price" id="cartTotal">0.00 RON</span>
+        <button class="btn-checkout" onclick="showCheckoutForm()">Finalizează comanda</button>
+    </div>
+
+    <!-- Formular de checkout (inițial ascuns) -->
+    <div id="checkoutForm" class="checkout-form d-none">
+        <h4>Date de livrare</h4>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Prenume *</label>
+                <input type="text" id="firstName" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Nume *</label>
+                <input type="text" id="lastName" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email *</label>
+                <input type="email" id="email" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Telefon *</label>
+                <input type="tel" id="phone" class="form-control" required>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Adresă completă *</label>
+                <input type="text" id="address" class="form-control" required placeholder="Strada, număr, bloc, apartament">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Oraș *</label>
+                <input type="text" id="city" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cod poștal</label>
+                <input type="text" id="postalCode" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Țară</label>
+                <input type="text" id="country" class="form-control" value="România">
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-md-6">
+                <label class="form-label">Nume firmă (opțional)</label>
+                <input type="text" id="companyName" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">CUI (opțional)</label>
+                <input type="text" id="cui" class="form-control">
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-3">
+            <button class="btn btn-outline-secondary rounded-pill" onclick="hideCheckoutForm()">Înapoi</button>
+            <button class="btn-checkout w-100" onclick="placeOrder()">Plasează comanda</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="footer-logo mb-3">
+                    <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+                </div>
+                <p>Specialiști în centrale termice și instalații de gaz. Confort garantat.</p>
+            </div>
+            <div class="col-md-2">
+                <h5>Navigare</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index.html">Acasă</a></li>
+                    <li><a href="proiect.html">Proiect</a></li>
+                    <li><a href="shop.html">Produse</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Program</h5>
+                <ul class="list-unstyled">
+                    <li>Luni – Vineri: 08–16</li>
+                    <li>Sâmbătă: Închis</li>
+                    <li>Duminică: Închis</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-geo-alt me-2"></i>Bd. Epureanu 34, Bârlad</li>
+                    <li><i class="bi bi-telephone me-2"></i>+40 721 123 456</li>
+                    <li><i class="bi bi-envelope me-2"></i>casigazserv@yahoo.com</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4">
+        <div class="text-center">
+            <small>&copy; 2026 Casigaz. Toate drepturile rezervate.</small>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API_BASE = '/backend/api/';
+const CART_URL = API_BASE + 'cart.php';
+const ORDERS_URL = API_BASE + 'checkout.php';    // sau checkout.php, după caz
+
+// Header scroll
+const navbar = document.getElementById('mainNav');
+if (window.innerWidth >= 992) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+}
+
+// Favorite count
+function updateFavCount() {
+    document.getElementById('favCount').textContent = JSON.parse(localStorage.getItem('casigaz_favorites') || '[]').length;
+}
+
+// Cart functions
+let cartItems = [];
+
+async function loadCart() {
+    try {
+        const res = await fetch(CART_URL);
+        const data = await res.json();
+        if (data.success) {
+            cartItems = data.items;
+            document.getElementById('cartCount').textContent = cartItems.length;
+            renderCart(cartItems, data.total);
+        }
+    } catch(e) {
+        console.error(e);
+        document.getElementById('cartItems').innerHTML = '<p class="text-danger">Eroare la încărcarea coșului.</p>';
+    }
+}
+
+function renderCart(items, total) {
+    const container = document.getElementById('cartItems');
+    const totalBox = document.getElementById('cartTotalBox');
+    if (!items.length) {
+        container.innerHTML = '<p class="text-center text-muted">Coșul este gol.</p>';
+        totalBox.classList.add('d-none');
+        return;
+    }
+    container.innerHTML = items.map(i => `
+        <div class="cart-item">
+            <img src="${i.main_image ? '/backend/' + i.main_image : 'https://via.placeholder.com/70'}" alt="${i.name}">
+            <div class="item-details">
+                <div class="item-name">${i.name}</div>
+                <div class="item-price">${i.price_on_request ? 'Preț la cerere' : parseFloat(i.price).toFixed(2) + ' RON'}</div>
+            </div>
+            <div class="item-quantity">
+                <input type="number" value="${i.quantity}" min="1" data-id="${i.id}" onchange="updateQty(this)">
+            </div>
+            <div class="item-subtotal">${i.price_on_request ? '—' : (i.price * i.quantity).toFixed(2) + ' RON'}</div>
+            <button class="remove-btn" onclick="removeItem(${i.product_id})"><i class="bi bi-trash"></i></button>
+        </div>
+    `).join('');
+    document.getElementById('cartTotal').textContent = total.toFixed(2) + ' RON';
+    totalBox.classList.remove('d-none');
+}
+
+async function updateQty(input) {
+    const cartId = input.dataset.id;
+    const qty = parseInt(input.value) || 1;
+    await fetch(CART_URL, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ cart_id: cartId, quantity: qty })
+    });
+    loadCart();
+}
+
+async function removeItem(productId) {
+    if (!confirm('Elimini acest produs din coș?')) return;
+    await fetch(CART_URL + '?product_id=' + productId, { method: 'DELETE' });
+    loadCart();
+}
+
+function showCheckoutForm() {
+    if (!cartItems.length) {
+        alert('Coșul este gol.');
+        return;
+    }
+    document.getElementById('checkoutForm').classList.remove('d-none');
+}
+function hideCheckoutForm() {
+    document.getElementById('checkoutForm').classList.add('d-none');
+}
+
+async function placeOrder() {
+    // Colectăm datele formularului
+    const orderData = {
+        first_name: document.getElementById('firstName').value.trim(),
+        last_name: document.getElementById('lastName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        postal_code: document.getElementById('postalCode').value.trim(),
+        country: document.getElementById('country').value.trim() || 'România',
+        company_name: document.getElementById('companyName').value.trim(),
+        cui: document.getElementById('cui').value.trim()
+    };
+
+    // Validare simplă
+    if (!orderData.first_name || !orderData.last_name || !orderData.email || !orderData.phone || !orderData.address || !orderData.city) {
+        alert('Te rugăm să completezi toate câmpurile obligatorii.');
+        return;
+    }
+
+    try {
+        const res = await fetch(ORDERS_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderData)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('Comanda a fost plasată cu succes!');
+            hideCheckoutForm();
+            loadCart(); // reîncarcă coșul (va fi gol)
+        } else {
+            alert('Eroare: ' + (data.message || 'Încearcă din nou.'));
+        }
+    } catch(e) {
+        alert('Eroare de conexiune.');
+    }
+}
+
+// Start
+document.addEventListener('DOMContentLoaded', () => {
+    updateFavCount();
+    loadCart();
+});
+</script>
+</body>
+</html>

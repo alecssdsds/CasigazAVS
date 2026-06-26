@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investiții pentru modernizarea microîntreprinderii CASIGAZ SERV SRL</title>
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --blue-dark: #1e3a8a;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 10px -2px rgba(0,0,0,0.03);
+            --radius: 1.25rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--white);
+            color: var(--text);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ========== HEADER ========== */
+        .navbar {
+            padding: 0.8rem 0;
+            background: var(--white);
+            box-shadow: var(--shadow);
+            z-index: 1040;
+        }
+        @media (min-width: 992px) {
+            .navbar {
+                background: transparent;
+                box-shadow: none;
+                padding: 1rem 0;
+                transition: var(--transition);
+            }
+            .navbar.scrolled {
+                background: rgba(255,255,255,0.85);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+                border-radius: 50px;
+                margin: 0.8rem auto;
+                max-width: 700px;
+                padding: 0.5rem 2rem;
+            }
+        }
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        @media (min-width: 992px) {
+            .navbar-brand img { height: 65px; }
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text) !important;
+            margin: 0 0.3rem;
+            transition: var(--transition);
+            border-radius: 50px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: var(--green-light);
+            color: var(--green) !important;
+        }
+        .header-icons .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none;
+            background: var(--gray-100);
+            color: var(--text);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header-icons .btn:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--green);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25em 0.5em;
+            border-radius: 20px;
+        }
+
+        /* ========== HERO / PROJECT CONTENT ========== */
+        .hero {
+            padding: 6rem 0 3rem;
+            background: linear-gradient(135deg, #e0f2fe 0%, #d1fae5 100%);
+            flex: 1;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(to right, var(--blue-dark), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .project-details {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .detail-card {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        .detail-card h5 {
+            color: var(--blue-dark);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .detail-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .detail-card li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        .detail-card li i {
+            color: var(--green);
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        .smis-badge {
+            display: inline-block;
+            background: var(--blue-dark);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 3rem 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--blue));
+        }
+        .footer h5 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .footer a:hover {
+            color: var(--green);
+        }
+        .footer-logo img {
+            height: 50px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="index.html">Acasă</a></li>
+                <li class="nav-item"><a class="nav-link active" href="proiect.html">Proiect</a></li>
+                <li class="nav-item"><a class="nav-link" href="shop.html">Produse</a></li>
+                <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            </ul>
+            <div class="header-icons d-flex gap-2 mt-2 mt-lg-0">
+                <a class="btn" href="favorite.html" title="Favorite">
+                    <i class="bi bi-heart"></i>
+                    <span class="badge-count" id="favCount">0</span>
+                </a>
+                <a class="btn" href="cos.html" title="Coș">
+                    <i class="bi bi-cart3"></i>
+                    <span class="badge-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<section class="hero">
+    <div class="container">
+        <h1 class="section-title">Investiții pentru modernizarea microîntreprinderii<br>CASIGAZ SERV SRL</h1>
+
+        <div class="project-details">
+            <!-- Imaginea UE -->
+            <div class="text-center mb-4">
+                <img src="imagini casigaz/Cofinantat de uniunea europeana.png" alt="Cofinanțat de Uniunea Europeană" style="max-width: 600px; width: 100%; height: auto;">
+            </div>
+
+            <!-- Detalii proiect -->
+            <div class="detail-card">
+                <h5><i class="bi bi-building me-2"></i>Beneficiar</h5>
+                <p>CASIGAZ SERV SRL</p>
+                <p class="text-success fw-bold">✅ Proiect finalizat</p>
+            </div>
+
+            <div class="detail-card">
+                <h5><i class="bi bi-bullseye me-2"></i>Obiectivele proiectului</h5>
+                <p class="fw-bold">Obiectiv General:</p>
+                <p>„Îmbunătățirea semnificativă a capacității tehnice și organizaționale a microîntreprinderii de a gestiona dezvoltarea de produse și servicii.”</p>
+                <p class="fw-bold mt-3">Obiectiv Specific:</p>
+                <p>Achiziția de echipamente tehnologice noi, echipamente informatice și active necorporale, implementarea unui sistem fotovoltaic, investiții realizate pentru activități conform codului CAEN Rev 2: CAEN 4221 – Lucrări de construcții a proiectelor utilitare pentru fluide.</p>
+                <p class="mt-3"><i class="bi bi-people-fill text-green me-2"></i>Au fost create <strong>3 noi locuri de muncă</strong>, dintre care <strong>1 angajat din mediul defavorizat</strong>.</p>
+            </div>
+
+            <div class="detail-card">
+                <h5><i class="bi bi-cash-stack me-2"></i>Valoarea proiectului</h5>
+                <ul>
+                    <li><i class="bi bi-check-circle"></i><strong>Valoare totală:</strong> 1.130.196,53 RON</li>
+                    <li><i class="bi bi-check-circle"></i><strong>Finanțare nerambursabilă:</strong> 874.585,23 RON</li>
+                </ul>
+            </div>
+
+            <div class="detail-card">
+                <h5><i class="bi bi-calendar-check me-2"></i>Perioada de implementare</h5>
+                <ul>
+                    <li><i class="bi bi-play-circle"></i><strong>Data începerii:</strong> 29.07.2024</li>
+                    <li><i class="bi bi-stop-circle"></i><strong>Data finalizării:</strong> 29.04.2025</li>
+                </ul>
+            </div>
+
+            <!-- Cod SMIS -->
+            <div class="text-center mt-4">
+                <div class="smis-badge">
+                    Cod SMIS: 317230
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="footer-logo mb-3">
+                    <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+                </div>
+                <p>Specialiști în centrale termice și instalații de gaz. Confort garantat.</p>
+                <div class="d-flex gap-2 mt-3">
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5>Navigare</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index.html">Acasă</a></li>
+                    <li><a href="proiect.html">Proiect</a></li>
+                    <li><a href="shop.html">Produse</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Program</h5>
+                <ul class="list-unstyled">
+                    <li>Luni – Vineri: 08–16</li>
+                    <li>Sâmbătă: Închis</li>
+                    <li>Duminică: Închis</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-geo-alt me-2"></i>Bd. Epureanu 34, Bârlad</li>
+                    <li><i class="bi bi-telephone me-2"></i>+40 721 123 456</li>
+                    <li><i class="bi bi-envelope me-2"></i>casigazserv@yahoo.com</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4">
+        <div class="text-center">
+            <small>&copy; 2026 Casigaz. Toate drepturile rezervate.</small>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS + custom scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Navbar transparent la scroll (doar desktop)
+    const navbar = document.getElementById('mainNav');
+    if (window.innerWidth >= 992) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+    }
+
+    // Funcționalitate pentru coș și favorite
+    document.getElementById('favCount').textContent = JSON.parse(localStorage.getItem('casigaz_favorites') || '[]').length;
+    fetch('/backend/api/cart.php')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) document.getElementById('cartCount').textContent = data.items.length;
+        })
+        .catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casigaz – Instalații Termice și Gaz Bârlad</title>
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --blue-dark: #1e3a8a;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 10px -2px rgba(0,0,0,0.03);
+            --radius: 1.25rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--white);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ========== HEADER ========== */
+        .navbar {
+            padding: 0.8rem 0;
+            background: var(--white);          /* fundal solid pe mobil */
+            box-shadow: var(--shadow);
+            z-index: 1040;
+        }
+        @media (min-width: 992px) {
+            .navbar {
+                background: transparent;
+                box-shadow: none;
+                padding: 1rem 0;
+                transition: var(--transition);
+            }
+            .navbar.scrolled {
+                background: rgba(255,255,255,0.85);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+                border-radius: 50px;
+                margin: 0.8rem auto;
+                max-width: 700px;
+                padding: 0.5rem 2rem;
+            }
+        }
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        @media (min-width: 992px) {
+            .navbar-brand img { height: 65px; }
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text) !important;
+            margin: 0 0.3rem;
+            transition: var(--transition);
+            border-radius: 50px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: var(--green-light);
+            color: var(--green) !important;
+        }
+        .header-icons .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none;
+            background: var(--gray-100);
+            color: var(--text);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header-icons .btn:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--green);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25em 0.5em;
+            border-radius: 20px;
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+            padding: 5rem 0 3rem;
+            background: linear-gradient(135deg, #e0f2fe 0%, #d1fae5 100%);
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .hero { padding: 7rem 0 5rem; }
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            background: linear-gradient(to right, var(--blue-dark), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.05rem;
+            color: var(--text-light);
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.8);
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: var(--blue-dark);
+            margin-bottom: 1.5rem;
+        }
+        .hero-logo {
+            text-align: center;
+        }
+        .hero-logo img {
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+        }
+
+        /* ========== SECTION TITLES ========== */
+        .section-title {
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+        @media (min-width: 768px) {
+            .section-title { font-size: 2.2rem; }
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--blue));
+            border-radius: 4px;
+            margin-top: 0.4rem;
+        }
+
+        /* ========== TEXT BLOCKS ========== */
+        .text-block p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: var(--text-light);
+        }
+
+        /* ========== PRODUCT CARDS ========== */
+        .product-card {
+            border: none;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: white;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            height: 100%;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+        .product-img-wrap {
+            height: 200px;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+        .product-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .product-card:hover .product-img-wrap img {
+            transform: scale(1.05);
+        }
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 2;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .favorite-btn.active { color: #ef4444; }
+        .product-category {
+            font-size: 0.75rem;
+            background: var(--green-light);
+            color: var(--green);
+            padding: 0.2em 0.8em;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        .product-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+        }
+        .product-price {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--blue-dark);
+        }
+        .btn-cart {
+            background: linear-gradient(135deg, var(--green), #059669);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .btn-cart:hover {
+            background: linear-gradient(135deg, #059669, var(--green));
+            transform: translateY(-1px);
+        }
+
+        /* ========== FEATURE ICONS ========== */
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--green-light), white);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--green);
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 3rem 0 1.5rem;
+        }
+        .footer h5 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .footer a:hover { color: var(--green); }
+        .footer-logo img {
+            height: 50px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link active" href="index.html">Acasă</a></li>
+                <li class="nav-item"><a class="nav-link" href="proiect.html">Proiect</a></li>
+                <li class="nav-item"><a class="nav-link" href="shop.html">Produse</a></li>
+                <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            </ul>
+            <div class="header-icons d-flex gap-2 mt-2 mt-lg-0">
+                <a class="btn" href="favorite.html" title="Favorite">
+                    <i class="bi bi-heart"></i>
+                    <span class="badge-count" id="favCount">0</span>
+                </a>
+                <a class="btn" href="cos.html" title="Coș">
+                    <i class="bi bi-cart3"></i>
+                    <span class="badge-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero" id="home">
+    <div class="container text-center text-md-start">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <span class="hero-badge"><i class="bi bi-star-fill text-warning"></i> Peste 15 ani de experiență</span>
+                <h1>Confortul casei tale începe aici</h1>
+                <p class="mt-3">Centrale termice, boilere, instalații de gaz și accesorii de la cei mai buni producători. Consultanță gratuită și montaj profesionist în Bârlad și împrejurimi.</p>
+                <a href="shop.html" class="btn btn-cart btn-lg mt-3 px-4 py-2"><i class="bi bi-arrow-down-circle me-2"></i> Vezi produsele</a>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block hero-logo">
+                <!-- Logo-ul Casigaz în locul imaginii cu centrala termică -->
+                <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== DESPRE NOI (text extins) ==================== -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6 text-block">
+                <h2 class="section-title">Despre Casigaz</h2>
+                <p>Casigaz este o companie din Bârlad, specializată în instalații termice și de gaz. De peste 15 ani, oferim servicii complete: consultanță, proiectare, montaj, revizii tehnice și service pentru centrale termice, boilere, sisteme de încălzire și instalații de gaz natural sau GPL.</p>
+                <p>Colaborăm cu branduri de top precum Vaillant, Bosch, Ariston și multe altele, ceea ce ne permite să oferim garanție extinsă și suport tehnic post-montaj. Echipa noastră este formată din profesioniști autorizați, care participă constant la cursuri de perfecționare.</p>
+                <p>Misiunea noastră este să asigurăm confortul termic și siguranța fiecărui client, indiferent de dimensiunea proiectului – de la o locuință individuală până la spații comerciale sau instituții.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="feature-icon mb-2"><i class="bi bi-shield-check"></i></div>
+                        <h6>Garanție extinsă</h6>
+                        <small class="text-muted">Toate produsele beneficiază de garanție oficială oferită de producători.</small>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="feature-icon mb-2"><i class="bi bi-truck"></i></div>
+                        <h6>Livrare rapidă</h6>
+                        <small class="text-muted">Expediem produsele în 24-48 de ore oriunde în țară.</small>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="feature-icon mb-2"><i class="bi bi-tools"></i></div>
+                        <h6>Montaj profesionist</h6>
+                        <small class="text-muted">Echipă autorizată, cu experiență în toate tipurile de instalații.</small>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="feature-icon mb-2"><i class="bi bi-headset"></i></div>
+                        <h6>Suport dedicat</h6>
+                        <small class="text-muted">Consultanță gratuită și service post-montaj oricând ai nevoie.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== PROIECT EUROPEAN ==================== -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-md-6">
+                <h2 class="section-title">Proiect european</h2>
+                <p>Casigaz a beneficiat de un proiect de finanțare europeană dedicat modernizării microîntreprinderii. Prin această investiție, am achiziționat echipamente de ultimă generație, am îmbunătățit procesele interne și am oferit angajaților cursuri de formare profesională.</p>
+                <p>Scopul proiectului a fost creșterea competitivității și a calității serviciilor oferite clienților noștri. Rezultatele se văd deja în timpii de execuție mai rapizi și în satisfacția crescută a beneficiarilor.</p>
+                <p class="fw-bold">Cod SMIS: 123456</p>
+                <a href="proiect.html" class="btn btn-outline-success rounded-pill mt-2">Află mai multe</a>
+            </div>
+            <div class="col-md-6">
+                <img src="imagini casigaz/Cofinantat de uniunea europeana.png" alt="Cofinanțat de Uniunea Europeană" class="img-fluid rounded-4 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== SERVICII (text suplimentar) ==================== -->
+<section class="py-5">
+    <div class="container text-block">
+        <h2 class="section-title">Ce putem face pentru tine</h2>
+        <p>Oferim o gamă completă de servicii în domeniul termic și al gazului: montaj centrale termice murale și de podea, instalare boilere și sisteme de apă caldă menajeră, proiectare și execuție instalații de gaz, verificări tehnice periodice și revizii, depanări urgente și service post-garanție. Indiferent de problemă, poți conta pe noi.</p>
+        <p>Lucrăm atât cu persoane fizice, cât și cu firme, asigurând respectarea tuturor normativelor în vigoare. Fiecare lucrare este însoțită de documentația necesară și de garanția scrisă a execuției.</p>
+    </div>
+</section>
+
+<!-- ==================== PRODUCTS ==================== -->
+<section id="products" class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="section-title">Produse recomandate</h2>
+                <p class="text-muted">O selecție din echipamentele noastre</p>
+            </div>
+            <a href="shop.html" class="btn btn-outline-success rounded-pill px-4">Vezi toate</a>
+        </div>
+        <!-- Grid produse -->
+        <div class="row g-4" id="productsGrid"></div>
+    </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="footer-logo mb-3">
+                    <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+                </div>
+                <p>Specialiști în centrale termice și instalații de gaz. Confort garantat.</p>
+                <div class="d-flex gap-2 mt-3">
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5>Navigare</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index.html">Acasă</a></li>
+                    <li><a href="proiect.html">Proiect</a></li>
+                    <li><a href="shop.html">Produse</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Program</h5>
+                <ul class="list-unstyled">
+                    <li>Luni – Vineri: 08–16</li>
+                    <li>Sâmbătă: Închis</li>
+                    <li>Duminică: Închis</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-geo-alt me-2"></i>Bd. Epureanu 34, Bârlad</li>
+                    <li><i class="bi bi-telephone me-2"></i>+40 721 123 456</li>
+                    <li><i class="bi bi-envelope me-2"></i>casigazserv@yahoo.com</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4">
+        <div class="text-center">
+            <small>&copy; 2026 Casigaz. Toate drepturile rezervate.</small>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS + custom scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ==================== CONFIG ====================
+const API_BASE = '/backend/api/';
+const PRODUCTS_URL = API_BASE + 'products.php';
+const CART_URL = API_BASE + 'cart.php';
+
+// ==================== HEADER SCROLL (doar desktop) ====================
+const navbar = document.getElementById('mainNav');
+if (window.innerWidth >= 992) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+}
+
+// ==================== FAVORITES (localStorage) ====================
+function getFavorites() { return JSON.parse(localStorage.getItem('casigaz_favorites') || '[]'); }
+function saveFavorites(favs) { localStorage.setItem('casigaz_favorites', JSON.stringify(favs)); }
+function toggleFavorite(product) {
+    const favs = getFavorites();
+    const idx = favs.findIndex(f => f.id == product.id);
+    if (idx > -1) favs.splice(idx, 1);
+    else favs.push(product);
+    saveFavorites(favs);
+    updateFavCount();
+    renderProducts(window.currentProducts || []);
+}
+function isFavorite(id) { return getFavorites().some(f => f.id == id); }
+function updateFavCount() {
+    document.getElementById('favCount').textContent = getFavorites().length;
+}
+
+// ==================== CART (API) ====================
+async function updateCartDisplay() {
+    try {
+        const res = await fetch(CART_URL);
+        const data = await res.json();
+        if (data.success) document.getElementById('cartCount').textContent = data.items.length;
+    } catch(e) {}
+}
+async function addToCart(productId) {
+    await fetch(CART_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ product_id: productId, quantity: 1 })
+    });
+    updateCartDisplay();
+}
+
+// ==================== PRODUCTS FETCH ====================
+async function fetchHomeProducts() {
+    try {
+        const res = await fetch(PRODUCTS_URL + '?limit=6');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+            window.currentProducts = json.data.slice(0, 6);
+            renderProducts(window.currentProducts);
+        }
+    } catch(e) { console.error(e); }
+}
+
+function renderProducts(products) {
+    const grid = document.getElementById('productsGrid');
+    if (!products || !products.length) {
+        grid.innerHTML = '<div class="col-12 text-center text-muted">Momentan nu sunt produse disponibile.</div>';
+        return;
+    }
+    grid.innerHTML = products.map(p => `
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card">
+                <a href="${p.url}" class="text-decoration-none">
+                    <div class="product-img-wrap">
+                        <img src="${p.image ? p.image : 'https://via.placeholder.com/300x240?text=Casigaz'}" alt="${p.name}" loading="lazy">
+                    </div>
+                </a>
+                <button class="favorite-btn ${isFavorite(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite({id:${p.id}, name:'${p.name.replace(/'/g, "\\'")}', price:${p.price}, image:'${p.image || ''}'})">
+                    <i class="bi ${isFavorite(p.id) ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                </button>
+                <div class="p-3">
+                    <span class="product-category">${p.category || 'General'}</span>
+                    <a href="${p.url}" class="text-decoration-none text-dark">
+                        <h6 class="product-title">${p.name}</h6>
+                    </a>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="product-price">${p.price_on_request ? 'Preț la cerere' : parseFloat(p.price).toFixed(2) + ' RON'}</span>
+                    </div>
+                    ${p.price_on_request ? 
+                        '<button class="btn btn-warning btn-sm w-100 mt-2">Cere ofertă</button>' :
+                        `<button class="btn btn-cart btn-sm w-100 mt-2" onclick="event.stopPropagation(); addToCart(${p.id})">Adaugă</button>`
+                    }
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ==================== START ====================
+document.addEventListener('DOMContentLoaded', () => {
+    updateFavCount();
+    updateCartDisplay();
+    fetchHomeProducts();
+    // navigation smooth
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) window.scrollTo({top: target.offsetTop - 80, behavior: 'smooth'});
+        });
+    });
+});
+</script>
+</body>
+</html>
