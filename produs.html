@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produs - Casigaz</title>
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --blue-dark: #1e3a8a;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 10px -2px rgba(0,0,0,0.03);
+            --radius: 1.25rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--white);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ========== HEADER ========== */
+        .navbar {
+            padding: 0.8rem 0;
+            background: var(--white);
+            box-shadow: var(--shadow);
+            z-index: 1040;
+        }
+        @media (min-width: 992px) {
+            .navbar {
+                background: transparent;
+                box-shadow: none;
+                padding: 1rem 0;
+                transition: var(--transition);
+            }
+            .navbar.scrolled {
+                background: rgba(255,255,255,0.85);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+                border-radius: 50px;
+                margin: 0.8rem auto;
+                max-width: 700px;
+                padding: 0.5rem 2rem;
+            }
+        }
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        @media (min-width: 992px) {
+            .navbar-brand img { height: 65px; }
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text) !important;
+            margin: 0 0.3rem;
+            transition: var(--transition);
+            border-radius: 50px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: var(--green-light);
+            color: var(--green) !important;
+        }
+        .header-icons .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--gray-100);
+            color: var(--text);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .header-icons .btn:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--green);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25em 0.5em;
+            border-radius: 20px;
+        }
+
+        /* ========== PRODUCT DETAIL ========== */
+        .product-detail { padding: 7rem 0 2rem; }
+        @media (min-width: 768px) { .product-detail { padding: 9rem 0 3rem; } }
+
+        .breadcrumb { font-size: 0.85rem; }
+        .breadcrumb a { color: var(--green); text-decoration: none; }
+
+        .gallery-main {
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: #f8fafc;
+            box-shadow: var(--shadow);
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .gallery-thumbs {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 0.8rem;
+        }
+        .gallery-thumbs img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .gallery-thumbs img.active,
+        .gallery-thumbs img:hover { border-color: var(--green); }
+
+        .product-category {
+            font-size: 0.75rem;
+            background: var(--green-light);
+            color: var(--green);
+            padding: 0.2em 0.8em;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+        .detail-title { font-weight: 800; font-size: 1.8rem; margin-bottom: 0.75rem; }
+        @media (min-width: 768px) { .detail-title { font-size: 2.2rem; } }
+        .detail-price { font-weight: 800; font-size: 1.9rem; color: var(--blue-dark); }
+        .detail-old-price { font-size: 1.1rem; color: var(--text-light); text-decoration: line-through; margin-left: 0.6rem; }
+        .detail-short { color: var(--text-light); font-size: 1.05rem; line-height: 1.6; }
+        .detail-description { line-height: 1.75; color: var(--text); }
+
+        .stock-badge { font-size: 0.85rem; font-weight: 600; }
+        .stock-in { color: var(--green); }
+        .stock-out { color: #ef4444; }
+
+        .btn-cart {
+            background: linear-gradient(135deg, var(--green), #059669);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            padding: 0.7rem 2rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .btn-cart:hover {
+            background: linear-gradient(135deg, #059669, var(--green));
+            transform: translateY(-1px);
+            color: white;
+        }
+        .btn-fav {
+            border-radius: 50px;
+            padding: 0.7rem 1.4rem;
+            font-weight: 600;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+        }
+        .footer h5 { color: white; font-weight: 700; margin-bottom: 1rem; font-size: 1rem; }
+        .footer a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+        .footer a:hover { color: var(--green); }
+        .footer-logo img { height: 50px; width: auto; }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="index">
+            <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="index">Acasă</a></li>
+                <li class="nav-item"><a class="nav-link" href="proiect">Proiect</a></li>
+                <li class="nav-item"><a class="nav-link active" href="shop">Produse</a></li>
+                <li class="nav-item"><a class="nav-link" href="contact">Contact</a></li>
+            </ul>
+            <div class="header-icons d-flex gap-2 mt-2 mt-lg-0">
+                <a class="btn" href="favorite" title="Favorite">
+                    <i class="bi bi-heart"></i>
+                    <span class="badge-count" id="favCount">0</span>
+                </a>
+                <a class="btn" href="cos" title="Coș">
+                    <i class="bi bi-cart3"></i>
+                    <span class="badge-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== PRODUCT DETAIL ==================== -->
+<section class="product-detail">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index">Acasă</a></li>
+                <li class="breadcrumb-item"><a href="shop">Produse</a></li>
+                <li class="breadcrumb-item active" aria-current="page" id="crumbName">…</li>
+            </ol>
+        </nav>
+
+        <div id="productContent">
+            <div class="text-center py-5">
+                <div class="spinner-border text-success"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="footer-logo mb-3">
+                    <img src="imagini casigaz/Logocasigaz.png" alt="Casigaz">
+                </div>
+                <p>Specialiști în centrale termice și instalații de gaz. Confort garantat.</p>
+                <div class="d-flex gap-2 mt-3">
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5>Navigare</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index">Acasă</a></li>
+                    <li><a href="proiect">Proiect</a></li>
+                    <li><a href="shop">Produse</a></li>
+                    <li><a href="contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Program</h5>
+                <ul class="list-unstyled">
+                    <li>Luni – Vineri: 08–16</li>
+                    <li>Sâmbătă: Închis</li>
+                    <li>Duminică: Închis</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-geo-alt me-2"></i>Bd. Epureanu 34, Bârlad</li>
+                    <li><i class="bi bi-telephone me-2"></i>+40 721 123 456</li>
+                    <li><i class="bi bi-envelope me-2"></i>casigazserv@yahoo.com</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4">
+        <div class="text-center">
+            <small>&copy; 2026 Casigaz. Toate drepturile rezervate.</small>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS + custom scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ==================== CONFIG ====================
+const API_BASE = '/backend/api/';
+const PRODUCTS_URL = API_BASE + 'products.php';
+const CART_URL = API_BASE + 'cart.php';
+const OFFERS_URL = API_BASE + 'offers.php';
+
+// ==================== HEADER SCROLL (doar desktop) ====================
+const navbar = document.getElementById('mainNav');
+if (window.innerWidth >= 992) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+}
+
+// ==================== HELPERS ====================
+function escapeHtml(str) {
+    return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function getSlugFromUrl() {
+    // Suportă /produs/<slug> și ?slug=<slug> / ?product=<slug>
+    const params = new URLSearchParams(location.search);
+    const qs = params.get('slug') || params.get('product');
+    if (qs) return qs.trim();
+    const parts = location.pathname.split('/').filter(Boolean);
+    const idx = parts.indexOf('produs');
+    if (idx > -1 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
+    return '';
+}
+
+// ==================== FAVORITES (localStorage) ====================
+function getFavorites() { return JSON.parse(localStorage.getItem('casigaz_favorites') || '[]'); }
+function saveFavorites(favs) { localStorage.setItem('casigaz_favorites', JSON.stringify(favs)); }
+function isFavorite(id) { return getFavorites().some(f => f.id == id); }
+function updateFavCount() { document.getElementById('favCount').textContent = getFavorites().length; }
+function toggleFavorite(product) {
+    const favs = getFavorites();
+    const idx = favs.findIndex(f => f.id == product.id);
+    if (idx > -1) favs.splice(idx, 1);
+    else favs.push(product);
+    saveFavorites(favs);
+    updateFavCount();
+    refreshFavButton(product.id);
+}
+function refreshFavButton(id) {
+    const btn = document.getElementById('favBtn');
+    if (!btn) return;
+    const active = isFavorite(id);
+    btn.classList.toggle('btn-danger', active);
+    btn.classList.toggle('btn-outline-danger', !active);
+    btn.querySelector('i').className = active ? 'bi bi-heart-fill' : 'bi bi-heart';
+    btn.querySelector('span').textContent = active ? 'În favorite' : 'Adaugă la favorite';
+}
+
+// ==================== CART (API) ====================
+async function updateCartDisplay() {
+    try {
+        const res = await fetch(CART_URL);
+        const data = await res.json();
+        if (data.success) document.getElementById('cartCount').textContent = data.items.length;
+    } catch (e) { console.error('Eroare cart:', e); }
+}
+async function addToCart(productId) {
+    await fetch(CART_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, quantity: 1 })
+    });
+    updateCartDisplay();
+}
+
+// ==================== RENDER ====================
+let currentProduct = null;
+
+function renderProduct(p) {
+    currentProduct = p;
+    document.title = (p.seo_title || p.name) + ' - Casigaz';
+    document.getElementById('crumbName').textContent = p.name;
+
+    const images = (Array.isArray(p.images) && p.images.length)
+        ? p.images
+        : [p.image || 'https://via.placeholder.com/600x600?text=Casigaz'];
+
+    const thumbs = images.length > 1
+        ? `<div class="gallery-thumbs">${images.map((img, i) =>
+            `<img src="${escapeHtml(img)}" class="${i === 0 ? 'active' : ''}" alt="${escapeHtml(p.name)}" onclick="selectImage(this, '${escapeHtml(img)}')">`
+          ).join('')}</div>`
+        : '';
+
+    const priceBlock = p.price_on_request
+        ? `<div class="detail-price">Preț la cerere</div>`
+        : `<div><span class="detail-price">${parseFloat(p.price).toFixed(2)} RON</span>${
+            p.old_price && parseFloat(p.old_price) > 0
+              ? `<span class="detail-old-price">${parseFloat(p.old_price).toFixed(2)} RON</span>` : ''
+          }</div>`;
+
+    const inStock = parseInt(p.in_stock) === 1;
+    const stockBlock = p.price_on_request ? '' : `
+        <p class="stock-badge ${inStock ? 'stock-in' : 'stock-out'} mt-2">
+            <i class="bi ${inStock ? 'bi-check-circle-fill' : 'bi-x-circle-fill'} me-1"></i>
+            ${inStock ? 'În stoc' : 'Stoc epuizat'}
+        </p>`;
+
+    const actionBtn = p.price_on_request
+        ? `<button class="btn btn-warning btn-cart" onclick="requestOffer(${p.id}, '${escapeHtml(p.name).replace(/'/g, "\\'")}')">
+               <i class="bi bi-envelope me-1"></i> Cere ofertă
+           </button>`
+        : `<button class="btn btn-cart" ${inStock ? '' : 'disabled'} onclick="addToCart(${p.id})">
+               <i class="bi bi-cart-plus me-1"></i> Adaugă în coș
+           </button>`;
+
+    document.getElementById('productContent').innerHTML = `
+        <div class="row g-4 g-lg-5">
+            <div class="col-lg-6">
+                <div class="gallery-main">
+                    <img id="mainImage" src="${escapeHtml(images[0])}" alt="${escapeHtml(p.name)}">
+                </div>
+                ${thumbs}
+            </div>
+            <div class="col-lg-6">
+                <span class="product-category">${escapeHtml(p.category || 'General')}</span>
+                <h1 class="detail-title">${escapeHtml(p.name)}</h1>
+                ${p.sku ? `<p class="text-muted small mb-2">Cod produs: ${escapeHtml(p.sku)}</p>` : ''}
+                ${p.short_description ? `<p class="detail-short">${escapeHtml(p.short_description)}</p>` : ''}
+                ${priceBlock}
+                ${stockBlock}
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    ${actionBtn}
+                    <button class="btn btn-outline-danger btn-fav" id="favBtn"
+                        onclick="toggleFavorite({id:${p.id}, name:'${escapeHtml(p.name).replace(/'/g, "\\'")}', price:${p.price}, image:'${escapeHtml(p.image || '')}', url:'${escapeHtml(p.url || '')}'})">
+                        <i class="bi bi-heart"></i> <span>Adaugă la favorite</span>
+                    </button>
+                </div>
+                ${p.description ? `
+                <hr class="my-4">
+                <h5 class="fw-bold mb-3">Descriere</h5>
+                <div class="detail-description">${escapeHtml(p.description).replace(/\n/g, '<br>')}</div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    refreshFavButton(p.id);
+}
+
+function selectImage(thumb, src) {
+    document.getElementById('mainImage').src = src;
+    document.querySelectorAll('.gallery-thumbs img').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+}
+
+function renderNotFound() {
+    document.title = 'Produs inexistent - Casigaz';
+    document.getElementById('crumbName').textContent = 'Inexistent';
+    document.getElementById('productContent').innerHTML = `
+        <div class="text-center py-5">
+            <i class="bi bi-exclamation-circle text-muted" style="font-size:3rem;"></i>
+            <h3 class="mt-3">Produsul nu a fost găsit</h3>
+            <p class="text-muted">Produsul căutat nu există sau nu mai este disponibil.</p>
+            <a href="shop" class="btn btn-cart mt-2"><i class="bi bi-arrow-left me-1"></i> Înapoi la produse</a>
+        </div>`;
+}
+
+async function loadProduct() {
+    const slug = getSlugFromUrl();
+    if (!slug) { renderNotFound(); return; }
+    try {
+        const res = await fetch(PRODUCTS_URL + '?slug=' + encodeURIComponent(slug));
+        const json = await res.json();
+        if (json.success && json.data) renderProduct(json.data);
+        else renderNotFound();
+    } catch (e) {
+        console.error('Eroare fetch produs:', e);
+        renderNotFound();
+    }
+}
+
+// ==================== OFFER MODAL ====================
+let _offerModal = null;
+function requestOffer(id, name) {
+    document.getElementById('offerProductId').value = id || '';
+    document.getElementById('offerProductLabel').textContent = name ? ('Produs: ' + name) : '';
+    if (!_offerModal) _offerModal = new bootstrap.Modal(document.getElementById('offerModal'));
+    _offerModal.show();
+}
+async function submitOffer() {
+    const payload = {
+        product_id: document.getElementById('offerProductId').value || null,
+        contact_name: document.getElementById('offerName').value.trim(),
+        company_name: document.getElementById('offerCompany').value.trim(),
+        phone: document.getElementById('offerPhone').value.trim(),
+        email: document.getElementById('offerEmail').value.trim(),
+        message: document.getElementById('offerMessage').value.trim()
+    };
+    if (!payload.contact_name || !payload.phone || !payload.email) {
+        alert('Te rugăm să completezi nume, telefon și email.');
+        return;
+    }
+    const btn = document.getElementById('offerSubmitBtn');
+    btn.disabled = true;
+    try {
+        const res = await fetch(OFFERS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        alert(data.message || (data.success ? 'Solicitare trimisă!' : 'Eroare. Încearcă din nou.'));
+        if (data.success) {
+            _offerModal.hide();
+            ['offerName', 'offerCompany', 'offerPhone', 'offerEmail', 'offerMessage'].forEach(i => document.getElementById(i).value = '');
+        }
+    } catch (e) {
+        alert('Eroare de conexiune.');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ==================== START ====================
+document.addEventListener('DOMContentLoaded', () => {
+    updateFavCount();
+    updateCartDisplay();
+    loadProduct();
+});
+</script>
+
+<!-- ==================== OFFER MODAL (CERE OFERTĂ) ==================== -->
+<div class="modal fade" id="offerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cere ofertă</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3" id="offerProductLabel"></p>
+        <input type="hidden" id="offerProductId">
+        <div class="mb-2"><input id="offerName" class="form-control" placeholder="Nume și prenume *"></div>
+        <div class="mb-2"><input id="offerCompany" class="form-control" placeholder="Companie (opțional)"></div>
+        <div class="mb-2"><input id="offerPhone" class="form-control" placeholder="Telefon *"></div>
+        <div class="mb-2"><input id="offerEmail" type="email" class="form-control" placeholder="Email *"></div>
+        <div class="mb-2"><textarea id="offerMessage" class="form-control" rows="3" placeholder="Detalii / mesaj (opțional)"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+        <button type="button" class="btn btn-warning" id="offerSubmitBtn" onclick="submitOffer()">Trimite solicitarea</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

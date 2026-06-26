@@ -28,7 +28,7 @@ if ($slug !== '') {
     $p['images'] = array_map(fn($i) => '/backend/' .$i['image_path'], $images);
     $main = getProductMainImage($p['id']);
     $p['image'] = $main ? '/backend/' .$main : null;
-    $p['url'] = '/shop.html?product=' . $p['slug'];
+    $p['url'] = '/produs/' . $p['slug'];
     $p['price_on_request'] = (int)$p['price_on_request'];
     $p['price'] = (float)$p['price'];
 
@@ -92,7 +92,7 @@ $rows = db()->fetchAll(
 foreach ($rows as &$product) {
     $image = getProductMainImage($product['id']);
     $product['image'] = $image ? '/backend/' .$image : null;
-    $product['url']   = '/shop.html?product=' . $product['slug'];
+    $product['url']   = '/produs/' . $product['slug'];
     $product['price'] = (float)$product['price'];
     $product['price_on_request'] = (int)$product['price_on_request'];
     $product['in_stock'] = (int)$product['in_stock'];

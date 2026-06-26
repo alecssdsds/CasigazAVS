@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Pretty product URLs: /produs/<slug> -> produs.html (slug citit din JS)
+RewriteRule ^produs/([^/]+)/?$ /produs.html [L,QSA]
+
 # Redirect /page.html -> /page (301), preserving query string
 RewriteCond %{THE_REQUEST} \s/+([^?\s]+)\.html[\s?] [NC]
 RewriteRule ^ /%1 [R=301,L]
