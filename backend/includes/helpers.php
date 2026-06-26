@@ -1,101 +1,134 @@
 <?php
+require_once __DIR__ . '/database.php';
 
+/*
+====================================================
+  GENERAL HELPERS
+====================================================
+*/
 function sanitize($input) {
-    return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars(strip_tags(trim((string)$input)), ENT_QUOTES, 'UTF-8');
 }
 
 function createSlug($string) {
+    $string = (string)$string;
+    // transliterare diacritice românești
+    $string = strtr($string, [
+        'ă'=>'a','â'=>'a','î'=>'i','ș'=>'s','ş'=>'s','ț'=>'t','ţ'=>'t',
+        'Ă'=>'a','Â'=>'a','Î'=>'i','Ș'=>'s','Ş'=>'s','Ț'=>'t','Ţ'=>'t',
+    ]);
     $string = strtolower($string);
-    $string = preg_replace('/[^a-z0-9-]/', '-', $string);
-    $string = preg_replace('/-+/', '-', $string);
+    $string = preg_replace('/[^a-z0-9]+/', '-', $string);
     return trim($string, '-');
 }
 
+function uniqueProductSlug($name, $ignoreId = null) {
+    $base = createSlug($name);
+    if ($base === '') $base = 'produs';
+    $slug = $base;
+    $i = 2;
+    while (true) {
+        if ($ignoreId) {
+            $row = db()->fetchOne('SELECT id FROM products WHERE slug = ? AND id <> ? LIMIT 1', [$slug, $ignoreId]);
+        } else {
+            $row = db()->fetchOne('SELECT id FROM products WHERE slug = ? LIMIT 1', [$slug]);
+        }
+        if (!$row) return $slug;
+        $slug = $base . '-' . $i++;
+    }
+}
+
+function uniqueCategorySlug($name, $ignoreId = null) {
+    $base = createSlug($name);
+    if ($base === '') $base = 'categorie';
+    $slug = $base;
+    $i = 2;
+    while (true) {
+        if ($ignoreId) {
+            $row = db()->fetchOne('SELECT id FROM categories WHERE slug = ? AND id <> ? LIMIT 1', [$slug, $ignoreId]);
+        } else {
+            $row = db()->fetchOne('SELECT id FROM categories WHERE slug = ? LIMIT 1', [$slug]);
+        }
+        if (!$row) return $slug;
+        $slug = $base . '-' . $i++;
+    }
+}
+
 function formatPrice($price) {
-    return number_format($price, 2, ',', '.') . ' RON';
+    return number_format((float)$price, 2, ',', '.') . ' RON';
 }
 
 function generateOrderNumber() {
-    return 'CAS-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+    return 'CAS-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
 }
 
 /*
 ====================================================
-  SUPABASE HELPERS (FĂRĂ PDO)
+  PRODUCT / IMAGE HELPERS
 ====================================================
 */
-
 function getProductMainImage($productId) {
-
-    $result = db()->fetchAll(
-        "product_images",
-        "?product_id=eq." . $productId . "&is_main=eq.1&limit=1"
+    $row = db()->fetchOne(
+        'SELECT image_path FROM product_images
+         WHERE product_id = ?
+         ORDER BY is_main DESC, sort_order ASC, id ASC
+         LIMIT 1',
+        [$productId]
     );
-
-    return $result[0]['image_path'] ?? null;
+    return $row['image_path'] ?? null;
 }
 
 function getProductImages($productId) {
-
     return db()->fetchAll(
-        "product_images",
-        "?product_id=eq." . $productId . "&order=sort_order.asc"
+        'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, id ASC',
+        [$productId]
     );
 }
 
 function getCategoryName($categoryId) {
-
     if (!$categoryId) return null;
-
-    $result = db()->fetchAll(
-        "categories",
-        "?id=eq." . $categoryId . "&limit=1"
-    );
-
-    return $result[0]['name'] ?? null;
+    $row = db()->fetchOne('SELECT name FROM categories WHERE id = ? LIMIT 1', [$categoryId]);
+    return $row['name'] ?? null;
 }
 
+/*
+====================================================
+  CART HELPERS
+====================================================
+*/
 function getCartCount() {
-
     $token = getSessionToken();
-
-    $result = db()->fetchAll(
-        "cart_items",
-        "?session_token=eq." . $token
+    $row = db()->fetchOne(
+        'SELECT COALESCE(SUM(quantity),0) AS c FROM cart_items WHERE session_token = ?',
+        [$token]
     );
-
-    $total = 0;
-
-    foreach ($result as $item) {
-        $total += $item['quantity'] ?? 0;
-    }
-
-    return $total;
+    return (int)($row['c'] ?? 0);
 }
 
 function getCartTotal() {
-
     $token = getSessionToken();
-
-    $cart = db()->fetchAll(
-        "cart_items",
-        "?session_token=eq." . $token
+    $row = db()->fetchOne(
+        'SELECT COALESCE(SUM(ci.quantity * p.price),0) AS t
+         FROM cart_items ci
+         JOIN products p ON p.id = ci.product_id
+         WHERE ci.session_token = ? AND p.price_on_request = 0',
+        [$token]
     );
-
-    $total = 0;
-
-    foreach ($cart as $item) {
-
-        $product = db()->fetchAll(
-            "products",
-            "?id=eq." . $item['product_id'] . "&limit=1"
-        );
-
-        if (!empty($product[0]) && ($product[0]['price_on_request'] ?? 0) == 0) {
-            $total += ($item['quantity'] * $product[0]['price']);
-        }
-    }
-
-    return $total;
+    return (float)($row['t'] ?? 0);
 }
-?>
+
+/*
+====================================================
+  EMAIL HELPER (UTF-8)
+====================================================
+*/
+function sendMail($to, $subject, $body) {
+    $headers  = 'From: ' . SITE_NAME . ' <' . SITE_EMAIL . ">\r\n";
+    $headers .= 'Reply-To: ' . SITE_EMAIL . "\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+    $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+
+    return @mail($to, $encodedSubject, $body, $headers);
+}

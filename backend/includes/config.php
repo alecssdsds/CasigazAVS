@@ -1,91 +1,58 @@
 <?php
+/*
+====================================================
+  CASIGAZ - CONFIG (MySQL 8.0)
+====================================================
+*/
+
+// --- Erori (dezactivează display_errors în producție) ---
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ==================== SUPABASE (API - RECOMANDAT) ====================
-
-// 🔴 COMPLETEAZĂ AICI CU DATELE TALE DIN SUPABASE
-define('SUPABASE_URL', 'https://wdoifaypyxdcenlitpsj.supabase.co/rest/v1/');
-define('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indkb2lmYXlweXhkY2VubGl0cHNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MzE4ODEsImV4cCI6MjA5ODAwNzg4MX0.Umm1oBw2WcQGXrPVswWzkmhRrVutrLKoZ1PSDYoa0Xg');
+// ==================== DATABASE ====================
+// IONOS: numele bazei de date este de regulă și username-ul.
+// Dacă hostul nu este "localhost", schimbă DB_HOST cu hostul din panoul IONOS
+// (ex: db5017xxxxx.hosting-data.io).
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: '01144012_avs');
+define('DB_USER', getenv('DB_USER') ?: '01144012_avs');
+define('DB_PASS', getenv('DB_PASS') ?: 'AVSolutions2026Parola');
+define('DB_CHARSET', 'utf8mb4');
 
 // ==================== SITE ====================
-
 define('SITE_NAME', 'Casigaz');
 define('SITE_URL', 'https://casigaz-serv.ro');
 define('SITE_EMAIL', 'contact@casigaz-serv.ro');
 define('ADMIN_EMAIL', 'casigazserv@yahoo.com');
 
-// ==================== UPLOAD ====================
+// ==================== ADMIN LOGIN ====================
+define('ADMIN_USER', 'Casigaz');
+define('ADMIN_PASS', 'Casigaz2026');
 
+// ==================== UPLOAD ====================
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
-define('MAX_FILE_SIZE', 150 * 1024 * 1024);
+define('UPLOAD_URL', '/backend/uploads/');
+define('MAX_FILE_SIZE', 15 * 1024 * 1024); // 15 MB
 define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 
-// ==================== COOKIE ====================
-
+// ==================== COOKIE / SESSION ====================
 define('COOKIE_NAME', 'casigaz_session');
-define('COOKIE_EXPIRY', 30 * 24 * 60 * 60);
+define('COOKIE_EXPIRY', 30 * 24 * 60 * 60); // 30 zile
 
 // ==================== TIMEZONE ====================
-
 date_default_timezone_set('Europe/Bucharest');
 
-
-// ==================== SUPABASE FUNCTION (IMPORTANT) ====================
-
-function supabaseRequest($table, $method = 'GET', $data = null, $query = '') {
-
-    $url = SUPABASE_URL . "/rest/v1/" . $table . $query;
-
-    $ch = curl_init($url);
-
-    $headers = [
-        "apikey: " . SUPABASE_KEY,
-        "Authorization: Bearer " . SUPABASE_KEY,
-        "Content-Type: application/json",
-        "Prefer: return=representation"
-    ];
-
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-    if ($method === 'POST') {
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    }
-
-    if ($method === 'PATCH') {
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PATCH");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    }
-
-    if ($method === 'DELETE') {
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-    }
-
-    $response = curl_exec($ch);
-
-    if (curl_errno($ch)) {
-        return [
-            "success" => false,
-            "message" => curl_error($ch)
-        ];
-    }
-
-    curl_close($ch);
-
-    return json_decode($response, true);
-}
-
-
-// ==================== HELPERS ====================
-
+/*
+====================================================
+  HTTP HELPERS
+====================================================
+*/
 function setCorsHeaders() {
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
         http_response_code(200);
         exit();
     }
@@ -93,14 +60,20 @@ function setCorsHeaders() {
 
 function jsonResponse($success, $data = null, $message = null, $httpCode = 200) {
     http_response_code($httpCode);
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=utf-8');
 
-    $response = ['success' => $success];
+    $response = ['success' => (bool)$success];
 
-    if ($data !== null) $response['data'] = $data;
+    // Permitem ca $data să fie un array care se contopește în răspuns
+    // (ex: ['items' => ..., 'total' => ...]) pentru compatibilitate cu frontend-ul.
+    if (is_array($data)) {
+        $response = array_merge($response, $data);
+    } elseif ($data !== null) {
+        $response['data'] = $data;
+    }
+
     if ($message !== null) $response['message'] = $message;
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
     exit();
 }
-?>

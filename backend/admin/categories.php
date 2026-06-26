@@ -1,112 +1,149 @@
 <?php
-session_start();
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/database.php';
+require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/uploads.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/_layout.php';
+
 requireAdmin();
 
-$db = db();
-
-/* DELETE PRODUCT */
+/* ---------- DELETE ---------- */
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-
-    $images = $db->fetchAll("SELECT image_path FROM product_images WHERE product_id = ?", [$id]);
-    foreach ($images as $img) {
-        $file = __DIR__ . '/../' . $img['image_path'];
-        if (file_exists($file)) unlink($file);
-    }
-
-    $db->delete('product_images', 'product_id = ?', [$id]);
-    $db->delete('products', 'id = ?', [$id]);
-
-    header('Location: products.php?msg=deleted');
+    $cat = db()->fetchOne('SELECT image_path FROM categories WHERE id = ?', [$id]);
+    if ($cat && $cat['image_path']) deleteImageFile($cat['image_path']);
+    db()->delete('categories', 'id = ?', [$id]); // produsele rămân (category_id -> NULL)
+    header('Location: categories.php?msg=deleted');
     exit();
 }
 
-/* TOGGLE STATUS */
-if (isset($_GET['toggle']) && is_numeric($_GET['toggle'])) {
-    $id = (int)$_GET['toggle'];
+/* ---------- CREATE / UPDATE ---------- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id   = (int)($_POST['id'] ?? 0);
+    $name = trim($_POST['name'] ?? '');
 
-    $current = $db->fetchOne("SELECT status FROM products WHERE id = ?", [$id]);
-    if ($current) {
-        $new = $current['status'] ? 0 : 1;
-        $db->update('products', ['status' => $new], 'id = ?', [$id]);
+    if ($name !== '') {
+        $data = [
+            'name'        => sanitize($name),
+            'description' => sanitize($_POST['description'] ?? ''),
+            'sort_order'  => (int)($_POST['sort_order'] ?? 0),
+            'status'      => isset($_POST['status']) ? 1 : 0,
+        ];
+
+        // imagine opțională
+        if (!empty($_FILES['image']['name'])) {
+            $up = uploadCategoryImage($_FILES['image']);
+            if ($up['success']) {
+                $data['image_path'] = $up['path'];
+            }
+        }
+
+        if ($id > 0) {
+            $data['slug'] = uniqueCategorySlug($name, $id);
+            db()->update('categories', $data, 'id = ?', [$id]);
+        } else {
+            $data['slug'] = uniqueCategorySlug($name);
+            db()->insert('categories', $data);
+        }
     }
-
-    header('Location: products.php?msg=updated');
+    header('Location: categories.php?msg=saved');
     exit();
 }
 
-/* PRODUCTS LIST */
-$products = $db->fetchAll("
-    SELECT p.*, c.name AS category_name
-    FROM products p
-    LEFT JOIN categories c ON p.category_id = c.id
-    ORDER BY p.created_at DESC
-");
+/* ---------- EDIT TARGET ---------- */
+$edit = null;
+if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
+    $edit = db()->fetchOne('SELECT * FROM categories WHERE id = ?', [(int)$_GET['edit']]);
+}
+
+/* ---------- LIST ---------- */
+$categories = db()->fetchAll(
+    'SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id) AS product_count
+     FROM categories c
+     ORDER BY c.sort_order ASC, c.name ASC'
+);
+
+adminHeader('categories', 'Categorii');
 ?>
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-<meta charset="UTF-8">
-<title>Produse</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Categorii</h2>
+</div>
+<?php flashMsg(); ?>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between mb-3">
-        <h3>Produse</h3>
-        <a href="product-edit.php" class="btn btn-success">+ Adaugă produs</a>
+<div class="row g-4">
+    <!-- FORM -->
+    <div class="col-md-4">
+        <div class="card-soft">
+            <h5><?= $edit ? 'Editează categoria' : 'Adaugă categorie' ?></h5>
+            <form method="POST" enctype="multipart/form-data">
+                <?php if ($edit): ?>
+                    <input type="hidden" name="id" value="<?= $edit['id'] ?>">
+                <?php endif; ?>
+
+                <div class="mb-2">
+                    <label class="form-label">Nume *</label>
+                    <input type="text" name="name" class="form-control" required
+                           value="<?= htmlspecialchars($edit['name'] ?? '') ?>">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Descriere</label>
+                    <textarea name="description" class="form-control" rows="2"><?= htmlspecialchars($edit['description'] ?? '') ?></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Ordine</label>
+                    <input type="number" name="sort_order" class="form-control"
+                           value="<?= (int)($edit['sort_order'] ?? 0) ?>">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Imagine (opțional)</label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <?php if (!empty($edit['image_path'])): ?>
+                        <img src="/backend/<?= htmlspecialchars($edit['image_path']) ?>" class="img-thumbnail mt-2" style="max-height:80px">
+                    <?php endif; ?>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="status" class="form-check-input" id="catStatus"
+                        <?= !$edit || $edit['status'] ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="catStatus">Activă</label>
+                </div>
+                <button class="btn-brand" type="submit"><?= $edit ? 'Salvează' : 'Adaugă' ?></button>
+                <?php if ($edit): ?>
+                    <a href="categories.php" class="btn btn-link">Anulează</a>
+                <?php endif; ?>
+            </form>
+        </div>
     </div>
 
-    <?php if (isset($_GET['msg'])): ?>
-        <div class="alert alert-success">
-            <?= $_GET['msg'] === 'deleted' ? 'Produs șters' : 'Actualizat' ?>
+    <!-- LIST -->
+    <div class="col-md-8">
+        <div class="card-soft">
+            <table class="table align-middle">
+                <thead><tr><th>Nume</th><th>Slug</th><th>Produse</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                <?php foreach ($categories as $c): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($c['name']) ?></td>
+                        <td><small class="text-muted"><?= htmlspecialchars($c['slug']) ?></small></td>
+                        <td><?= (int)$c['product_count'] ?></td>
+                        <td>
+                            <span class="badge bg-<?= $c['status'] ? 'success' : 'secondary' ?>">
+                                <?= $c['status'] ? 'Activă' : 'Inactivă' ?>
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="?edit=<?= $c['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="?delete=<?= $c['id'] ?>" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Ștergi categoria?')">Del</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if (empty($categories)): ?>
+                    <tr><td colspan="5" class="text-muted">Nicio categorie încă.</td></tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    <?php endif; ?>
-
-    <table class="table table-bordered bg-white">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nume</th>
-            <th>Categorie</th>
-            <th>Preț</th>
-            <th>Stoc</th>
-            <th>Status</th>
-            <th>Acțiuni</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <?php foreach ($products as $p): ?>
-            <tr>
-                <td><?= $p['id'] ?></td>
-                <td><?= htmlspecialchars($p['name']) ?></td>
-                <td><?= htmlspecialchars($p['category_name'] ?? '-') ?></td>
-                <td>
-                    <?= $p['price_on_request']
-                        ? 'La cerere'
-                        : number_format($p['price'], 2) . ' RON' ?>
-                </td>
-                <td><?= $p['stock'] ?></td>
-                <td>
-                    <span class="badge bg-<?= $p['status'] ? 'success' : 'danger' ?>">
-                        <?= $p['status'] ? 'Activ' : 'Inactiv' ?>
-                    </span>
-                </td>
-                <td>
-                    <a href="product-edit.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="?toggle=<?= $p['id'] ?>" class="btn btn-sm btn-warning">Toggle</a>
-                    <a href="?delete=<?= $p['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Ștergi?')">Del</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
+    </div>
 </div>
-
-</body>
-</html>
+<?php adminFooter(); ?>

@@ -529,8 +529,8 @@ function renderProducts(products) {
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="product-price">${p.price_on_request ? 'Preț la cerere' : parseFloat(p.price).toFixed(2) + ' RON'}</span>
                     </div>
-                    ${p.price_on_request ? 
-                        '<button class="btn btn-warning btn-sm w-100 mt-2">Cere ofertă</button>' :
+                    ${p.price_on_request ?
+                        `<button class="btn btn-warning btn-sm w-100 mt-2" onclick="event.stopPropagation(); requestOffer(${p.id}, '${(p.name||'').replace(/'/g, "\\'")}')">CERE OFERTĂ</button>` :
                         `<button class="btn btn-cart btn-sm w-100 mt-2" onclick="event.stopPropagation(); addToCart(${p.id})">Adaugă</button>`
                     }
                 </div>
@@ -557,6 +557,69 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartDisplay();
     fetchCategoriesAndProducts();
 });
+</script>
+<!-- ==================== OFFER MODAL (CERE OFERTĂ) ==================== -->
+<div class="modal fade" id="offerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cere ofertă</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3" id="offerProductLabel"></p>
+        <input type="hidden" id="offerProductId">
+        <div class="mb-2"><input id="offerName" class="form-control" placeholder="Nume și prenume *"></div>
+        <div class="mb-2"><input id="offerCompany" class="form-control" placeholder="Companie (opțional)"></div>
+        <div class="mb-2"><input id="offerPhone" class="form-control" placeholder="Telefon *"></div>
+        <div class="mb-2"><input id="offerEmail" type="email" class="form-control" placeholder="Email *"></div>
+        <div class="mb-2"><textarea id="offerMessage" class="form-control" rows="3" placeholder="Detalii / mesaj (opțional)"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+        <button type="button" class="btn btn-warning" id="offerSubmitBtn" onclick="submitOffer()">Trimite solicitarea</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const OFFERS_URL = '/backend/api/offers.php';
+let _offerModal = null;
+function requestOffer(id, name) {
+    document.getElementById('offerProductId').value = id || '';
+    document.getElementById('offerProductLabel').textContent = name ? ('Produs: ' + name) : '';
+    if (!_offerModal) _offerModal = new bootstrap.Modal(document.getElementById('offerModal'));
+    _offerModal.show();
+}
+async function submitOffer() {
+    const payload = {
+        product_id: document.getElementById('offerProductId').value || null,
+        contact_name: document.getElementById('offerName').value.trim(),
+        company_name: document.getElementById('offerCompany').value.trim(),
+        phone: document.getElementById('offerPhone').value.trim(),
+        email: document.getElementById('offerEmail').value.trim(),
+        message: document.getElementById('offerMessage').value.trim()
+    };
+    if (!payload.contact_name || !payload.phone || !payload.email) {
+        alert('Te rugăm să completezi nume, telefon și email.');
+        return;
+    }
+    const btn = document.getElementById('offerSubmitBtn');
+    btn.disabled = true;
+    try {
+        const res = await fetch(OFFERS_URL, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        alert(data.message || (data.success ? 'Solicitare trimisă!' : 'Eroare. Încearcă din nou.'));
+        if (data.success) {
+            _offerModal.hide();
+            ['offerName','offerCompany','offerPhone','offerEmail','offerMessage'].forEach(i => document.getElementById(i).value = '');
+        }
+    } catch (e) {
+        alert('Eroare de conexiune.');
+    } finally {
+        btn.disabled = false;
+    }
+}
 </script>
 </body>
 </html>

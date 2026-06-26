@@ -1,158 +1,55 @@
 <?php
-
-session_start();
-
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/_layout.php';
 
 requireAdmin();
 
-/*
-====================================================
-  SAVE SETTINGS
-====================================================
-*/
+/* ---------- SAVE ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     foreach ($_POST as $key => $value) {
-
         if ($key === 'submit') continue;
-
-        $existing = db()->fetchAll(
-            "settings",
-            "?setting_key=eq." . urlencode($key) . "&limit=1"
-        );
-
-        if (!empty($existing)) {
-
-            db()->update(
-                "settings",
-                ["setting_value" => sanitize($value)],
-                "?setting_key=eq." . urlencode($key)
-            );
-
+        $exists = db()->fetchOne('SELECT id FROM settings WHERE setting_key = ?', [$key]);
+        if ($exists) {
+            db()->update('settings', ['setting_value' => sanitize($value)], 'setting_key = ?', [$key]);
         } else {
-
-            db()->insert("settings", [
-                "setting_key" => $key,
-                "setting_value" => sanitize($value)
-            ]);
+            db()->insert('settings', ['setting_key' => $key, 'setting_value' => sanitize($value)]);
         }
     }
-
     header('Location: settings.php?msg=saved');
     exit();
 }
 
-/*
-====================================================
-  LOAD SETTINGS
-====================================================
-*/
-$result = db()->fetchAll("settings");
-
+/* ---------- LOAD ---------- */
 $settings = [];
-
-foreach ($result as $row) {
+foreach (db()->fetchAll('SELECT setting_key, setting_value FROM settings') as $row) {
     $settings[$row['setting_key']] = $row['setting_value'];
 }
 
+adminHeader('settings', 'Setări');
 ?>
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setări - Admin</title>
+<h2 class="mb-3">Setări generale</h2>
+<?php flashMsg(); ?>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
-    <style>
-        body { background: #f1f5f9; }
-        .sidebar { min-height: 100vh; background: #0f172a; color: white; padding: 1.5rem 0; }
-        .sidebar .brand { font-size: 1.5rem; font-weight: 700; padding: 0 1.5rem; margin-bottom: 2rem; }
-        .sidebar .brand span { color: #10b981; }
-        .sidebar .nav-link { color: #94a3b8; padding: 0.75rem 1.5rem; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: white; }
-        .main-content { padding: 2rem; }
-        .form-card { background: white; border-radius: 1rem; padding: 2rem; }
-        .btn-save { background: #10b981; color: white; border: none; border-radius: 50px; padding: 0.5rem 2rem; }
-    </style>
-</head>
-
-<body>
-
-<div class="container-fluid">
-    <div class="row">
-
-        <div class="col-md-2 sidebar d-none d-md-block">
-            <div class="brand">Casigaz <span>Admin</span></div>
-
-            <nav class="nav flex-column">
-                <a class="nav-link" href="dashboard.php">Dashboard</a>
-                <a class="nav-link" href="products.php">Produse</a>
-                <a class="nav-link" href="categories.php">Categorii</a>
-                <a class="nav-link" href="orders.php">Comenzi</a>
-                <a class="nav-link" href="offers.php">Oferte</a>
-                <a class="nav-link active" href="settings.php">Setări</a>
-            </nav>
-        </div>
-
-        <div class="col-md-10 main-content">
-
-            <h2>Setări Generale</h2>
-
-            <?php if (isset($_GET['msg'])): ?>
-                <div class="alert alert-success">Setări salvate!</div>
-            <?php endif; ?>
-
-            <form method="POST" class="form-card">
-
-                <input type="text" name="site_name"
-                    value="<?= htmlspecialchars($settings['site_name'] ?? 'Casigaz') ?>"
-                    class="form-control mb-2"
-                    placeholder="Nume site">
-
-                <input type="email" name="site_email"
-                    value="<?= htmlspecialchars($settings['site_email'] ?? '') ?>"
-                    class="form-control mb-2"
-                    placeholder="Email">
-
-                <input type="text" name="site_phone"
-                    value="<?= htmlspecialchars($settings['site_phone'] ?? '') ?>"
-                    class="form-control mb-2"
-                    placeholder="Telefon">
-
-                <input type="text" name="site_address"
-                    value="<?= htmlspecialchars($settings['site_address'] ?? '') ?>"
-                    class="form-control mb-2"
-                    placeholder="Adresă">
-
-                <input type="text" name="currency"
-                    value="<?= htmlspecialchars($settings['currency'] ?? 'RON') ?>"
-                    class="form-control mb-2"
-                    placeholder="Monedă">
-
-                <input type="text" name="shipping_cost"
-                    value="<?= htmlspecialchars($settings['shipping_cost'] ?? '0') ?>"
-                    class="form-control mb-2"
-                    placeholder="Transport">
-
-                <input type="text" name="vat_rate"
-                    value="<?= htmlspecialchars($settings['vat_rate'] ?? '19') ?>"
-                    class="form-control mb-3"
-                    placeholder="TVA">
-
-                <button class="btn-save" type="submit">Salvează</button>
-
-            </form>
-
-        </div>
-    </div>
+<div class="card-soft" style="max-width:640px">
+    <form method="POST">
+        <div class="mb-2"><label class="form-label">Nume site</label>
+            <input type="text" name="site_name" class="form-control" value="<?= htmlspecialchars($settings['site_name'] ?? 'Casigaz') ?>"></div>
+        <div class="mb-2"><label class="form-label">Email contact</label>
+            <input type="email" name="site_email" class="form-control" value="<?= htmlspecialchars($settings['site_email'] ?? '') ?>"></div>
+        <div class="mb-2"><label class="form-label">Telefon</label>
+            <input type="text" name="site_phone" class="form-control" value="<?= htmlspecialchars($settings['site_phone'] ?? '') ?>"></div>
+        <div class="mb-2"><label class="form-label">Adresă</label>
+            <input type="text" name="site_address" class="form-control" value="<?= htmlspecialchars($settings['site_address'] ?? '') ?>"></div>
+        <div class="mb-2"><label class="form-label">Monedă</label>
+            <input type="text" name="currency" class="form-control" value="<?= htmlspecialchars($settings['currency'] ?? 'RON') ?>"></div>
+        <div class="mb-2"><label class="form-label">Cost transport</label>
+            <input type="text" name="shipping_cost" class="form-control" value="<?= htmlspecialchars($settings['shipping_cost'] ?? '0') ?>"></div>
+        <div class="mb-3"><label class="form-label">TVA (%)</label>
+            <input type="text" name="vat_rate" class="form-control" value="<?= htmlspecialchars($settings['vat_rate'] ?? '19') ?>"></div>
+        <button class="btn-brand" type="submit">Salvează</button>
+    </form>
 </div>
-
-</body>
-</html>
+<?php adminFooter(); ?>

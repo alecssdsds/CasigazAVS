@@ -1,4 +1,1 @@
-<?php
-header('Location: /');
-exit();
-?>
+<?php // silence is golden

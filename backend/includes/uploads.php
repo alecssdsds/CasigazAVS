@@ -1,198 +1,140 @@
 <?php
+require_once __DIR__ . '/config.php';
 
 /*
 ====================================================
-  IMAGE UPLOAD SYSTEM (IONOS + SUPABASE COMPATIBLE)
+  IMAGE UPLOAD SYSTEM
+  - Folosește GD (webp) dacă e disponibil,
+    altfel salvează fișierul original.
 ====================================================
 */
 
-function createDirectories() {
-
+function ensureUploadDirs() {
     $dirs = [
+        UPLOAD_DIR,
         UPLOAD_DIR . 'products/',
-        UPLOAD_DIR . 'products/original/',
-        UPLOAD_DIR . 'products/large/',
-        UPLOAD_DIR . 'products/thumb/',
         UPLOAD_DIR . 'categories/',
-        UPLOAD_DIR . 'banners/'
+        UPLOAD_DIR . 'banners/',
     ];
-
     foreach ($dirs as $dir) {
-        if (!file_exists($dir)) {
-            mkdir($dir, 0755, true);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
         }
     }
 }
 
-/*
-====================================================
-  RESIZE IMAGE (GD LIB REQUIRED)
-====================================================
-*/
-function resizeImage($source, $destination, $width, $height, $quality = 80) {
+function gdAvailable() {
+    return function_exists('imagecreatetruecolor') && function_exists('imagewebp');
+}
 
-    $info = getimagesize($source);
+/**
+ * Redimensionează (păstrând proporțiile) și salvează ca webp.
+ */
+function resizeToWebp($source, $destination, $maxW, $maxH, $quality = 82) {
+    if (!gdAvailable()) return false;
+
+    $info = @getimagesize($source);
     if (!$info) return false;
 
-    list($origWidth, $origHeight) = $info;
+    [$origW, $origH] = $info;
     $mime = $info['mime'];
 
-    $ratio = min($width / $origWidth, $height / $origHeight);
-    $newWidth = (int)($origWidth * $ratio);
-    $newHeight = (int)($origHeight * $ratio);
-
     switch ($mime) {
-        case 'image/jpeg':
-            $sourceImage = imagecreatefromjpeg($source);
-            break;
-        case 'image/png':
-            $sourceImage = imagecreatefrompng($source);
-            break;
-        case 'image/gif':
-            $sourceImage = imagecreatefromgif($source);
-            break;
-        case 'image/webp':
-            $sourceImage = imagecreatefromwebp($source);
-            break;
-        default:
-            return false;
+        case 'image/jpeg': $img = @imagecreatefromjpeg($source); break;
+        case 'image/png':  $img = @imagecreatefrompng($source);  break;
+        case 'image/gif':  $img = @imagecreatefromgif($source);  break;
+        case 'image/webp': $img = @imagecreatefromwebp($source); break;
+        default: return false;
     }
+    if (!$img) return false;
 
-    if (!$sourceImage) return false;
+    $ratio = min($maxW / $origW, $maxH / $origH, 1);
+    $newW = max(1, (int)($origW * $ratio));
+    $newH = max(1, (int)($origH * $ratio));
 
-    $newImage = imagecreatetruecolor($newWidth, $newHeight);
+    $new = imagecreatetruecolor($newW, $newH);
+    imagealphablending($new, false);
+    imagesavealpha($new, true);
+    $transparent = imagecolorallocatealpha($new, 255, 255, 255, 127);
+    imagefilledrectangle($new, 0, 0, $newW, $newH, $transparent);
 
-    // preserve transparency for PNG
-    if ($mime === 'image/png') {
-        imagealphablending($newImage, false);
-        imagesavealpha($newImage, true);
-        $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
-        imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
-    }
+    imagecopyresampled($new, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
 
-    imagecopyresampled(
-        $newImage,
-        $sourceImage,
-        0, 0, 0, 0,
-        $newWidth,
-        $newHeight,
-        $origWidth,
-        $origHeight
-    );
+    $ok = imagewebp($new, $destination, $quality);
 
-    imagewebp($newImage, $destination, $quality);
+    imagedestroy($img);
+    imagedestroy($new);
 
-    imagedestroy($sourceImage);
-    imagedestroy($newImage);
-
-    return true;
+    return $ok;
 }
 
-/*
-====================================================
-  PRODUCT IMAGE UPLOAD
-====================================================
-*/
-function uploadProductImage($file, $productId = null) {
-
-    createDirectories();
-
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'message' => 'Eroare la upload'];
+function validateUpload($file) {
+    if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+        return 'Eroare la upload';
     }
-
     if ($file['size'] > MAX_FILE_SIZE) {
-        return ['success' => false, 'message' => 'Fișier prea mare'];
+        return 'Fișier prea mare';
     }
-
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-    if (!in_array($ext, ALLOWED_EXTENSIONS)) {
-        return ['success' => false, 'message' => 'Tip fișier nepermis'];
+    if (!in_array($ext, ALLOWED_EXTENSIONS, true)) {
+        return 'Tip fișier nepermis';
     }
-
-    $filename = uniqid() . '_' . bin2hex(random_bytes(6)) . '.webp';
-
-    $originalPath = UPLOAD_DIR . 'products/original/' . $filename;
-    $largePath    = UPLOAD_DIR . 'products/large/' . $filename;
-    $thumbPath    = UPLOAD_DIR . 'products/thumb/' . $filename;
-
-    $tempFile = $file['tmp_name'];
-
-    if (!resizeImage($tempFile, $originalPath, 1920, 1920, 85)) {
-        return ['success' => false, 'message' => 'Eroare procesare imagine'];
+    $info = @getimagesize($file['tmp_name']);
+    if (!$info) {
+        return 'Fișierul nu este o imagine validă';
     }
-
-    resizeImage($tempFile, $largePath, 800, 800, 80);
-    resizeImage($tempFile, $thumbPath, 300, 300, 75);
-
-    return [
-        'success' => true,
-        'path' => 'uploads/products/original/' . $filename,
-        'filename' => $filename
-    ];
+    return null; // ok
 }
 
-/*
-====================================================
-  CATEGORY IMAGE UPLOAD
-====================================================
-*/
-function uploadCategoryImage($file) {
+/**
+ * Salvează o imagine într-un subfolder (products|categories|banners).
+ * Returnează ['success'=>bool, 'path'=>'uploads/.../file.ext', 'message'=>...]
+ */
+function saveImage($file, $subfolder, $maxW = 1000, $maxH = 1000) {
+    ensureUploadDirs();
 
-    createDirectories();
-
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'message' => 'Eroare upload'];
+    $err = validateUpload($file);
+    if ($err) {
+        return ['success' => false, 'message' => $err];
     }
 
-    if ($file['size'] > MAX_FILE_SIZE) {
-        return ['success' => false, 'message' => 'Fișier prea mare'];
-    }
+    $base = uniqid('', true) . '_' . bin2hex(random_bytes(4));
+    $targetDir = UPLOAD_DIR . $subfolder . '/';
 
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-    if (!in_array($ext, ALLOWED_EXTENSIONS)) {
-        return ['success' => false, 'message' => 'Tip fișier nepermis'];
-    }
-
-    $filename = uniqid() . '_' . bin2hex(random_bytes(6)) . '.webp';
-
-    $path = UPLOAD_DIR . 'categories/' . $filename;
-
-    if (!resizeImage($file['tmp_name'], $path, 800, 800, 85)) {
-        return ['success' => false, 'message' => 'Eroare procesare imagine'];
-    }
-
-    return [
-        'success' => true,
-        'path' => 'uploads/categories/' . $filename
-    ];
-}
-
-/*
-====================================================
-  DELETE IMAGE (SAFE)
-====================================================
-*/
-function deleteImage($path) {
-
-    $fullPath = __DIR__ . '/../' . $path;
-
-    if (file_exists($fullPath)) {
-        unlink($fullPath);
-    }
-
-    $dirs = ['original', 'large', 'thumb'];
-
-    foreach ($dirs as $dir) {
-
-        $derivedPath = str_replace('/original/', '/' . $dir . '/', $path);
-        $fullDerived = __DIR__ . '/../' . $derivedPath;
-
-        if (file_exists($fullDerived)) {
-            unlink($fullDerived);
+    if (gdAvailable()) {
+        $filename = $base . '.webp';
+        $dest = $targetDir . $filename;
+        if (resizeToWebp($file['tmp_name'], $dest, $maxW, $maxH)) {
+            return ['success' => true, 'path' => 'uploads/' . $subfolder . '/' . $filename];
         }
+        // fallthrough la salvare original dacă eșuează
+    }
+
+    // Fallback: salvăm fișierul original
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $filename = $base . '.' . $ext;
+    $dest = $targetDir . $filename;
+
+    if (move_uploaded_file($file['tmp_name'], $dest) || @copy($file['tmp_name'], $dest)) {
+        return ['success' => true, 'path' => 'uploads/' . $subfolder . '/' . $filename];
+    }
+
+    return ['success' => false, 'message' => 'Nu s-a putut salva imaginea'];
+}
+
+function uploadProductImage($file) {
+    return saveImage($file, 'products', 1200, 1200);
+}
+
+function uploadCategoryImage($file) {
+    return saveImage($file, 'categories', 800, 800);
+}
+
+function deleteImageFile($relativePath) {
+    if (!$relativePath) return;
+    $full = __DIR__ . '/../' . ltrim($relativePath, '/');
+    // siguranță: rămânem în interiorul folderului uploads
+    if (strpos(realpath(dirname($full)) ?: '', realpath(UPLOAD_DIR) ?: 'XX') === 0) {
+        if (is_file($full)) @unlink($full);
     }
 }
-?>
